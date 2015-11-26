@@ -1,0 +1,1 @@
+print_table [left, right, right, right] ["Ore", "Value/m3", "Cost/m3", "Hourly Value"] (map prep_row $ sortBy most_valuable $ zip4 types values costs hourly)

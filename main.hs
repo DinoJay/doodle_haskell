@@ -2,25 +2,44 @@ import Doodle
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Text as T
+import Text.PrettyPrint
+import Data.List
 
-data Rec t = Rec{title :: String, ts :: Map Int (t, t), ps :: Map Int String }
+
+data Ts t = Ts {st :: t , et:: t , ps :: [String]}  deriving Show
+data Rec t = Rec{title :: String, tsMap :: Map Int (Ts t)}
 
 instance Doodle Rec where
     initialize x = myinit x
-    add (t0, t1) d = myAddTs (t0, t1) d
+    add (t0, t1) d = myAddTsWrapper (t0, t1) d
     remove k d = myRemove k d
     toogle s k d = myToogle s k d
 
--- instance Show (Rec t) where
---   show r = r
+instance Show (Rec t) where
+  show r
+    | Map.null (tsMap r) == False = printRec r
+    -- TODO: dirty hack not working
+    | otherwise = "\&"
 
-myinit s = Rec{title = s, ts = Map.empty, ps = Map.empty}
-myAddTs (t0, t1) d = Rec{title = title d, ts = addHelper (t0, t1) (ts d), ps = ps d}
-myRemove k d = Rec{title = title d, ts = Map.delete k (ts d), ps = ps d}
--- TODO
-myToogle s k d = Rec{title = title d, ts = ts d, ps = (Map.insert k s (ps d)) }
+printRec r = "+------------------------------------------------------+\n"
+             ++ "| " ++ (title r) ++ "| \n" ++
+             "+------------------------------------------------------+"
+            ++ map (\v -> et v) ( tsMap r)
 
-addHelper (t0, t1) d = (Map.insert (myFreshKey d) (t0, t1) d)
+myinit s = Rec{title = s, tsMap = Map.empty}
+myAddTsWrapper ts d = Rec{title = title d,
+                        tsMap = myInsertTs ts (tsMap d)}
+myInsertTs (t0, t1) d = (Map.insert (myFreshKey d)
+                        Ts{st = t0, et = t1, ps =[] } d)
+
+myRemove k d = Rec{title = title d, tsMap = Map.delete k (tsMap d)}
+
+myToogle v k d = Rec{title = title d, tsMap = addPs k v (tsMap d) }
+
+addPs k v tsm = Map.update(
+                    \x -> Just (Ts{st = st x, et = et x, ps = v : (ps x)})
+                 ) k tsm
+
 myFreshKey p
     | Map.null p == False = succ (fst $ Map.findMax p)
     | otherwise = 1
@@ -41,3 +60,32 @@ main = do
           let w = RecMap Map.empty 0 :: RecMap Int (Rec String)
           run w
 --           return ()
+--
+---- a type for records
+data T = T { make  :: String
+           , model :: String
+           , years :: [Int] }
+    deriving Show
+
+-- test data
+test =
+    [ T "foo" "avengersadsaddsa" [1990, 1992]
+    , T "bar" "eagle"   [1980, 1982]
+    ]
+
+-- print lists of records: a header, then each row
+draw :: [T] -> Doc
+draw xs =
+    text "Make\t|\tModel\t|\tYear"
+   $+$
+    vcat (map row xs)
+ where
+    -- print a row
+    row t = foldl1 (<|>) [ text (make t)
+                         , text (model t)
+                         , foldl1 (<^>) (map int (years t))
+                         ]
+
+-- helpers
+x <|> y = x <> text "\t|\t" <> y
+x <^> y = x <> text "," <+> y
