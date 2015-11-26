@@ -3,7 +3,7 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Text as T
 
-data Rec t = Rec{title :: String, ts :: Map Int (t, t), ps :: Map Int String } deriving Show
+data Rec t = Rec{title :: String, ts :: Map Int (t, t), ps :: Map Int String }
 
 instance Doodle Rec where
     initialize x = myinit x
@@ -11,19 +11,21 @@ instance Doodle Rec where
     remove k d = myRemove k d
     toogle s k d = myToogle s k d
 
+-- instance Show (Rec t) where
+--   show r = r
+
 myinit s = Rec{title = s, ts = Map.empty, ps = Map.empty}
 myAddTs (t0, t1) d = Rec{title = title d, ts = addHelper (t0, t1) (ts d), ps = ps d}
 myRemove k d = Rec{title = title d, ts = Map.delete k (ts d), ps = ps d}
+-- TODO
+myToogle s k d = Rec{title = title d, ts = ts d, ps = (Map.insert k s (ps d)) }
 
-myToogle s k d = Rec{title = title d, ts = ts d,
-                     ps = (Map.insert k s (ps d)) }
-
+addHelper (t0, t1) d = (Map.insert (myFreshKey d) (t0, t1) d)
 myFreshKey p
     | Map.null p == False = succ (fst $ Map.findMax p)
     | otherwise = 1
 
 -- helper for above
-addHelper (t0, t1) d = (Map.insert (myFreshKey d) (t0, t1) d)
 
 data RecMap k v = RecMap (Map k v) k deriving (Show)
 
