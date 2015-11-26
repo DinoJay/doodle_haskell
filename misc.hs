@@ -5,7 +5,7 @@ data Ts t = Ts {st :: t , et:: t , ps :: [String]}  deriving Show
 -- test data
 test =
     [ Ts "start" "end" ["jan", "nils"]
-    , Ts "showTable" "end"   ["babba", "kiran", "nils"]
+    , Ts "showTable" "end"   ["babba", "kiran", "nils", "Ralf", "Gisela", "Rudi", "Cairo"]
     ]
 
 -- functions that fill a string (s) to a given width (n) by adding pad
@@ -22,9 +22,9 @@ showTable ts =
     let header = "Title"
         rows = [[f t | f <- [st, et, (intercalate ", " . map show . ps)]] | t <- ts]
         widths = [maximum $ map length col | col <- transpose $ [header] : rows]
-        separator = "+-" ++ ( intercalate "-+-" [replicate width '-' | width <- widths] ) ++ "-"
-        headSep = ( intercalate "---" [replicate width '-' | width <- widths] ) ++ "---"
-        fillCols cols = "| " ++  (intercalate " | " [fillLeft width col | (width, col) <- zip widths cols]++"| \n"++separator)
+        separator = "+-" ++ ( intercalate "-+-" [replicate width '-' | width <- widths] ) ++ "-+"
+        headSep = "+" ++ ( intercalate "--" [replicate width '-' | width <- widths] ) ++ "-----"
+        fillCols cols = "| " ++  (intercalate " | " [fillLeft width col | (width, col) <- zip widths cols]++" |\n"++separator)
         fillTitle header =  headSep ++ "\n| " ++ header ++ "\n"++separator
     in
         unlines $ fillTitle header : map fillCols rows
