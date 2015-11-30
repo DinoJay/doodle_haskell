@@ -1,4 +1,4 @@
-module Doodle (Doodle(initialize, add, remove, toogle), Pool(freshKey, get, set), run) where
+module Doodle (Doodle(initialize, add, remove, toogle), Pool(freshKey, get, set), run, turn, populate) where
 import qualified System.IO
 
 prompt :: Read a => String -> IO b -> (a -> IO b) -> IO b
