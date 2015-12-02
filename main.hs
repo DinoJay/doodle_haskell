@@ -69,8 +69,10 @@ myAddTsWrapper ts d = Rec{title = title d, tsMap = myInsert ts (tsMap d)}
 -- myInsertTs (t0, t1) tss = (Map.insert (myFreshKey tss) Ts{st = t0, et = t1, ps =[] } tss)
 
 myInsert (t2, t3) tss =
-    if (getTimeClash tss (t2, t3)) then (Map.insert (myFreshKey tss) Ts{st = t2, et = t3, ps =[]} tss) else tss
+    if (getTimeClash tss (t2, t3)) then (orderMap $ Map.insert (myFreshKey tss) Ts{st = t2, et = t3, ps =[]} tss) else tss
 
+orderMap xs = Map.fromList $ ( zip [1..] list )
+    where list = List.sort $ ( List.map snd ( Map.toList xs ) )
 
 myRemove k d = Rec{title = title d, tsMap = Map.delete k (tsMap d)}
 
